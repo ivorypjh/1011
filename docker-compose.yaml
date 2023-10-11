@@ -1,0 +1,42 @@
+version: "3"
+services:
+  mydb: # 아무 이름이나 생성
+    image: mysql:8.0 # 이미지 이름
+    container_name: mysql_app1 # 컨테이너 이름
+    volumes:
+      - mydb_data:/var/www/html # 코드와 동일하게 작성
+    networks: # --net 옵션
+      - myapp-net
+    restart: always # --restart 옵션
+    ports: # -p 옵션
+      - "3307:3306"
+    environment: # -e 옵션
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: whdgh
+      MYSQL_USER: whdgh
+      MYSQL_PASSWORD: whdgh
+  myweb: # wordpress에 대한 코드
+    image: wordpress:5.7
+    container_name: wordpress_app1 # 컨테이너 이름
+    volumes: # 2개의 볼륨 작성
+      - myweb_data:/var/www/html
+      - ./myweb-log:/var/log
+    networks: # 위에서와 동일한 네트워크 사용
+      - myapp-net
+    restart: always
+    ports:
+      - "8080:80"
+    environment: # HOST에 이전과 다르게 컨테이너 이름이 아니라 서비스 이름을 사용
+      WORDPRESS_DB_HOST: "mydb_app:3306" 
+      WORDPRESS_DB_NAME: whdgh
+      WORDPRESS_DB_USER: whdgh
+      WORDPRESS_DB_PASSWORD: whdgh
+    depends_on: # db를 먼저 실행시켜줘야 함
+      - mydb
+
+networks: # 네트워크를 구성
+  myapp-net: {}
+
+volumes: # 볼륨을 구성
+  mydb_data: {}
+  myweb_data: {}
